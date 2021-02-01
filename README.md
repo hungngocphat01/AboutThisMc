@@ -3,8 +3,8 @@
 The "About this Mac" that most macOS rices miss.
 
 <center>
-<img src="first-preview.png" style="max-height:300px;"/>
-<img src="first-bigsur-preview.png" style="max-height:300px;"/>
+<img src="first-preview.png" style="max-height:100px;"/>
+<img src="first-bigsur-preview.png" style="max-height:100px;"/>
 </center>
 
 # Introduction
