@@ -14,7 +14,8 @@ context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORIT
 class MainWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="About this PC")
-
+        self.set_resizable(False)
+        
         # Add a custom headerbar
         self.hb = Gtk.HeaderBar()
         self.hb.props.show_close_button = True
