@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+if [[ -f "./overview-conf.json" ]]; then
+    ./mcos-about $@ &
+    exit
+else
+    echo "Default configuration file does not exist. You have to run the regular mcos-about to create the configuration file first."
+fi
