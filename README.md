@@ -33,6 +33,7 @@ I had used it for about a year on a Hackintosh until upgraded to a more powerful
     ```bash
     mcos-about
     ```
+- On the first run, the program will ask you to generate a configuration file.
 - You can read more options in the help document of the program:
     ```bash
     mcos-about help
@@ -47,6 +48,7 @@ I had used it for about a year on a Hackintosh until upgraded to a more powerful
 # Configuration file
 - Since generating the system info to mimic the macOS style requires root access, so I decided to generate and write the system info to a json file (first run only). Upon next launches, the script will read and display the system info stored in the mentioned file. As a consequence, you will have to re-configure the program each time you upgrade your hardware or your distro, or else the information will stay the same, but this process is not very time-consuming.
 - The program allows you to freely create, load and manipulate the configuration files. You can edit your displayed system specifications to suit your needs.
+- You will be guided to create one upon your first time launching the program.
 - The configuration file is a json file, and it has the following properties:
     - `distro_image_path`: A string denoting the path of the distro image.
     - `distro_image_size`: A list, consists of the size of the given image (members must be numeric).
