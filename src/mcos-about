@@ -363,7 +363,7 @@ RUNNING
 NOTES
     To generate the macOS-like system info, the program have to gain root access and do lots of user verifications so far, so each time you upgrade your hardware, you have to execute the configuration procedure again.
     Furthermore, given that you can create and load from custom json files, and the information is static unless you edit them, you are able to freely create, load and manipulate many profiles to suit your needs. 
-
+    For more information, please visit https://github.com/hungngocphat01/AboutThisMc.
 """)
 
 def validate_overview_json(path) -> bool:
