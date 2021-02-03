@@ -1,19 +1,26 @@
 #!/usr/bin/python3
 from typing import OrderedDict
-import gi, json, os, subprocess, re, sys
+import gi, json, os, subprocess, re, sys, shutil
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GdkPixbuf, Gdk
 
-# Load CSS
-css = ''
-css_provider = Gtk.CssProvider()
-css_provider.load_from_data(css)
-context = Gtk.StyleContext()
-screen = Gdk.Screen.get_default()
-context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+SCRIPTDIR = os.path.dirname(os.path.realpath(__file__))
+DEFAULT_OV_CONF = SCRIPTDIR + "/overview-conf.json"
+
+def show_error(maintext, secondarytext):
+    print(maintext, ":", secondarytext)
+    dialog = Gtk.MessageDialog(
+        flags=0,
+        message_type=Gtk.MessageType.ERROR,
+        buttons=Gtk.ButtonsType.OK,
+        text=maintext 
+    )
+    dialog.format_secondary_text(secondarytext)
+    dialog.run()
+    dialog.destroy()
 
 class MainWindow(Gtk.Window):
-    def __init__(self):
+    def __init__(self, overview_json_path=DEFAULT_OV_CONF):
         Gtk.Window.__init__(self, title="About this PC")
         self.set_resizable(False)
         
@@ -33,6 +40,7 @@ class MainWindow(Gtk.Window):
         self.hb.set_custom_title(self.stack_sw)
 
         # Initialize the "Overview" tab
+        self.overview_json_path = overview_json_path
         self.overview_init()
         
         # Initialize the "Displays" tab
@@ -46,8 +54,12 @@ class MainWindow(Gtk.Window):
 
     def overview_init(self):
         # Load information from json
-        with open("overview-info.json", mode="rt") as f:
+        print("Loading config from", self.overview_json_path)
+        with open(self.overview_json_path, mode="rt") as f:
             conf = json.loads(f.read())
+        
+        if not validate_overview_json(self.overview_json_path):
+            sys.exit(-1)
 
         # Horizontal box (2 col: distro image and info)
         overview_layout = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=conf["logo_space"])
@@ -76,7 +88,8 @@ class MainWindow(Gtk.Window):
 
         # Initialize system info
         FIELD_SP = 20
-        hostname = Gtk.Label(label=conf["hostname"])
+        hostname = Gtk.Label()
+        hostname.set_markup(f"<span font_weight='bold'>{conf['hostname']}</span>")
         hostname.props.halign = Gtk.Align.START
         system_info.pack_start(hostname, False, False, 0)
 
@@ -139,7 +152,8 @@ class MainWindow(Gtk.Window):
         self.stack.add_titled(service_layout, "service_layout", "Service")
 
 
-clrscr = lambda: print(chr(27) + "[2J")
+clrscr = lambda: os.system("clear")
+
 get_sys_stdout = lambda cmd: subprocess.check_output(cmd, shell=True)
 
 def config_confirm():
@@ -152,11 +166,7 @@ def config_confirm():
         input("You entered an invalid option. This  section's configuration will restart.\nPress any key to continue.")
         return False
 
-def start_configuration():
-    # Dump empty data
-    with open("overview-info.json", mode="wt") as f:
-        f.write()
-        
+def start_configuration(config_path=DEFAULT_OV_CONF):
     json_data = {
         "distro_image_path": "tux-logo.png",
         "distro_image_size": [160, 160],
@@ -179,7 +189,8 @@ def start_configuration():
     clrscr()
     print("Now we will go through several steps to generate your system info (to match the macOS style).")
     print("Please ensure that you have all the dependencies installed before continuing: neofetch, dmidecode.")
-    print("Works only on Linux\n")
+    print("Works only on Linux.")
+    print("Chosen configuration file:", config_path)
     input("Press any key when you are ready.")
 
 
@@ -194,7 +205,7 @@ def start_configuration():
     for line in neofetch_output:
         line = line.strip().split(":")
         if (len(line) >= 2):
-            neofetch_sys_info[line[0].strip()] = ":".join(line[1:None])
+            neofetch_sys_info[line[0].strip()] = ":".join(line[1:None]).strip()
 
     while True:
         clrscr()
@@ -227,7 +238,7 @@ def start_configuration():
             for line in os_release_output:
                 line = line.split("=")
                 if (len(line) == 2):
-                    os_release[line[0].upper()] = line[1]
+                    os_release[line[0].upper()] = line[1].strip()
             
             part1 = os_release["NAME"]
             if "VERSION" in os_release:
@@ -236,7 +247,7 @@ def start_configuration():
                 json_data["distro_ver"] = neofetch_sys_info["Kernel"]
 
             if "VERSION_CODENAME" in os_release:
-                part2 = os_release["ERSION_CODENAME"]
+                part2 = os_release["VERSION_CODENAME"]
             else:
                 part2 = ""
 
@@ -294,48 +305,116 @@ def start_configuration():
     
     json_data["memory"] = str(ram_size) + " " + ram_unit + " " + ram_bus + " " + ram_technology
 
-    print(f"Your detected RAM info: {json_data['memory']}.\nIf it is incorrect, you can manually edit it later in ~/.local/share/mcos-about/overview-info.json.")
+    print(f"Your detected RAM info: {json_data['memory']}.\nIf it is incorrect, you can manually edit it later in {config_path}.json.")
     input("Press any key to continue...")
 
     lsblk_output = get_sys_stdout("lsblk -o mountpoint,name,label --list | grep /").decode("utf-8").replace("\r\n", "\n").split("\n")
     for line in lsblk_output:
         line = line.split()
-        if line[0] == "/":
+        if len(line) >= 1 and line[0] == "/":
             if (len(line) >= 3):
                 json_data["startup_disk"] = " ".join(line[2:None])
             else:
                 json_data["startup_disk"] = line[1]
+            break
 
     json_data["graphics"] = neofetch_sys_info["GPU"]
 
-    json_data["serial_num"] = get_sys_stdout(r"sudo dmidecode --type baseboard | grep Serial | sed 's/^[ \t]*Serial Number: //;s/$[\n]//'").decode("utf-8")
+    json_data["serial_num"] = get_sys_stdout(r"sudo dmidecode --type baseboard | grep Serial | sed 's/^[ \t]*Serial Number: //'").decode("utf-8").strip("\n")
 
-    with open("overview-info.json", mode="wt") as f:
+    while True:
+        clrscr()
+        image_path = input("Please paste your distro image path here: ")
+        if not os.path.exists(image_path):
+            input("The specified path does not exist. Press any key to retry...")
+        else:
+            shutil.copy(image_path, SCRIPTDIR + "/distro-logo.png")
+            json_data["distro_image_path"] = SCRIPTDIR + "/distro-logo.png"
+            break
+    
+    with open(config_path, mode="wt") as f:
         json.dump(json_data, f, indent=2)
 
     clrscr()
-    print("Configuration completed successfully. Your system info is now saved at ~/.local/share/overview-info.json")
+    print(f"Configuration completed successfully. Your system info is now saved at {config_path}")
     print("You can re-run this config anytime by issueing: mcos-about configure")
     print("For help document, please run: mcos-about help")
 
-def normal_run():
-    w = MainWindow()
+def normal_run(overview_json=DEFAULT_OV_CONF):
+    w = MainWindow(overview_json)
     w.connect("destroy", Gtk.main_quit)
     w.show_all()
     Gtk.main()
 
 
 def print_help():
-    pass
-command = sys.argv[0].lower()
+    print("""
+McOS About - the missing 'About my Mac' for macOS rices.
+By hungngocphat01
 
-if not os.path.exists("overview-info.json"):
-    print("First time run detected. Configuration will now start.")
-    command = "configure"
+RUNNING
+    mcos-about <args>
+    mcos-about: run the program normally. If there is no system info file found, you will be prompted to create one.
+    mcos-about configure: re-execute the configuration procedure.
+    mcos-about configure <path>: execute the configuration procedure and write to a custom path.
+    mcos-about help: show this help message
+    mcos-about load-overview <filename>.json: load a custom overview-info.json file rather than the default one in the installed directory.
+
+NOTES
+    To generate the macOS-like system info, the program have to gain root access and do lots of user verifications so far, so each time you upgrade your hardware, you have to execute the configuration procedure again.
+    Furthermore, given that you can create and load from custom json files, and the information is static unless you edit them, you are able to freely create, load and manipulate many profiles to suit your needs. 
+
+""")
+
+def validate_overview_json(path) -> bool:
+    if not os.path.exists(path):
+        show_error("File not found", f"The specified path doesn not exist: {path}")
+        return False
+    with open(path, mode="rt") as f:
+        json_data = json.loads(f.read())
+        
+        # Validate keys
+        keys = ["distro_image_path", "distro_image_size", "distro_markup", "distro_ver", "hostname", "cpu", "memory", "startup_disk", "graphics", "serial_num", "serial_num", "overview_margins", "section_space", "logo_space", "system_info_command", "software_update_command", "font-family"]
+        for key in keys:
+            if key not in json_data:
+                show_error("Invalid configuration file", f"Missing key: {key}. Please run the configuration procedure again.")
+        
+        # Evaluate each key
+        if not os.path.exists(json_data["distro_image_path"]):
+            show_error("Invalid path", f"The specified distro image file cannot be found:\n{json_data['distro_image_path']}")
+            return False
+        if not isinstance(json_data["distro_image_size"], list):
+            show_error("Invalid configuration file", "distro_image_size must be a list.")
+            return False
+        for item in json_data["distro_image_size"]:
+            if not isinstance(item, float) and not isinstance(item, int):
+                show_error("Invalid configuration file", "distro_image_size items must be numeric.")
+                return False          
+        if not isinstance(json_data["overview_margins"], list):
+            show_error("Invalid configuration file", "overview_margins must be a list.")
+            return False
+        for item in json_data["overview_margins"]:
+            if not isinstance(item, float) and not isinstance(item, int):
+                show_error("Invalid configuration file", "overview_margins items must be numeric.")
+                return False     
+        return True 
+
+if len(sys.argv) > 1:
+    command = sys.argv[1].lower()
+else:
+    command = None
 
 if command == "configure":
-    start_configuration()
+    if len(sys.argv) >= 3:
+        start_configuration(sys.argv[2])
+    else:
+        start_configuration()
 elif command == "help":
     print_help()
+elif command == "load-overview":
+    normal_run(sys.argv[2])
 else:
-    normal_run()
+    if not os.path.exists(DEFAULT_OV_CONF):
+        start_configuration()
+    else:
+        normal_run()
