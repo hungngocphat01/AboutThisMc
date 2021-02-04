@@ -11,7 +11,7 @@ A highly customizable "About this Mac" that is missing in most macOS rices.
 - I love macOS, because it profits both advantages of Linux and Windows: a Unix shell, and the abundance of popular industry standard softwares (like Microsoft Office, Adobe *, ...). The most important thing is that its UI is soooo stunning!<br>
 I had used it for about a year on a Hackintosh until upgraded to a more powerful machine, but it is powered by an AMD Ryzen CPU. So, no more Hackintosh. I found my way (back) to Arch Linux and KDE Plasma (actually I had used them prior to macOS) and did all the ricing stuff (you can find my setup [here](https://github.com/hungngocphat01/KDEintosh)). I realized that all macOS rices ever always miss one thing: the "About this Mac" window. That's why I created this - a simple GTK 3.0 application to mimic it.
 - This software is still under development and not fully tested.
-- You are allowed to freely copy, make changes and redistribute this script, as long as you credit me as the original author.
+- This software is released under the GNU GPLv3 license.
 
 # Dependencies
 - bash
