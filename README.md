@@ -3,8 +3,8 @@
 A highly customizable "About this Mac" that is missing in most macOS rices.
 
 <center>
-<img src="first-preview.png" style="max-height:100px;"/>
-<img src="first-bigsur-preview.png" style="max-height:100px;"/>
+<img src="first-preview.png"/>
+<img src="first-bigsur-preview.png"/>
 </center>
 
 # Introduction
