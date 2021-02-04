@@ -1,6 +1,6 @@
-# About this fake Mac
+# About This (fake) Mac
 
-The "About this Mac" that most macOS rices miss.
+A highly customizable "About this Mac" that is missing in most macOS rices.
 
 <center>
 <img src="first-preview.png" style="max-height:100px;"/>
@@ -127,7 +127,8 @@ Given that you have already had the configuration files generated.
     ```
 
 # Roadmap
-- Implement "Display" and "Storage" tab.
+- Implement font changing.
+- Implement "Storage" tab.
 
 # Changelog
 ```
