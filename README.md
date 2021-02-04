@@ -23,7 +23,7 @@ I had used it for about a year on a Hackintosh until upgraded to a more powerful
 - Download the png file of your distro logo (transparent background recommended) and take note of its path because the program will require it later.
 - Git clone this repo to somewhere.
     ```bash
-    cd mcos-about
+    cd about-this-mc
     cd src
     make install
     ```
@@ -31,19 +31,18 @@ I had used it for about a year on a Hackintosh until upgraded to a more powerful
 # Running
 - Run from the terminal:
     ```bash
-    mcos-about
+    about-this-mc
     ```
 - On the first run, the program will ask you to generate a configuration file.
-- You can read more options in the help document of the program:
+- More command line arguments are available in the help document of the program:
     ```bash
-    mcos-about help
+    about-this-mc help
     ```
-- You can also run it without a terminal (suitable for something like Kpple Menu) by executing:
+- If you want to use it with something like Kpple Menu, execute the following command:
     ```bash
-    mcos-about-noterm
+    about-this-mc &
     ```
-- You can pass arguments to the `mcos-about-noterm` exactly like the regular `mcos-about`, but it will not output to any terminal.
-- In case you ran the `noterm` version of the program and nothing happened, try to run the regular version to see errors output to the terminal if there are any.
+Given that you have already had the configuration files generated.
 
 # Configuration file
 - Since generating the system info to mimic the macOS style requires root access, so I decided to generate and write the system info to a json file (first run only). Upon next launches, the script will read and display the system info stored in the mentioned file. As a consequence, you will have to re-configure the program each time you upgrade your hardware or your distro, or else the information will stay the same, but this process is not very time-consuming.
@@ -70,7 +69,7 @@ I had used it for about a year on a Hackintosh until upgraded to a more powerful
 - Sample config file 1:
     ```json
     {
-    "distro_image_path": "/home/ngocphat/local/share/mcos-about/distro-logo.png",
+    "distro_image_path": "/home/ngocphat/local/share/about-this-mc/distro-logo.png",
     "distro_image_size": [
         160,
         160
@@ -100,7 +99,7 @@ I had used it for about a year on a Hackintosh until upgraded to a more powerful
 - Sample config file 2 (for faking a MacBook on macOS rices):
     ```json
     {
-    "distro_image_path": "/home/ngocphat/local/share/mcos-about/bigsur.png",
+    "distro_image_path": "/home/ngocphat/local/share/about-this-mc/bigsur.png",
     "distro_image_size": [
         160,
         160
