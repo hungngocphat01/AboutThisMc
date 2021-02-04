@@ -1,12 +1,10 @@
-INSTALLDIR = ~/.local/share/mcos-about
+INSTALLDIR = ~/.local/share/about-this-mc
 install:
 	mkdir -p $(INSTALLDIR)
-	cp mcos-about* $(INSTALLDIR)
-	chmod +x $(INSTALLDIR)/mcos-about*
-	sudo ln -sf $(INSTALLDIR)/mcos-about /usr/bin/mcos-about
-	sudo ln -sf $(INSTALLDIR)/mcos-about-noterm /usr/bin/mcos-about-noterm
+	cp about-this-mc $(INSTALLDIR)
+	chmod +x $(INSTALLDIR)/about-this-mc
+	sudo ln -sf $(INSTALLDIR)/about-this-mc /usr/bin/about-this-mc
 uninstall:
-	sudo rm /usr/bin/mcos-about
-	sudo rm /usr/bin/mcos-about-noterm
+	sudo rm /usr/bin/about-this-mc
 	rm -rf $(INSTALLDIR)
 	
