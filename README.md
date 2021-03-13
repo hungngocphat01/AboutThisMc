@@ -2,6 +2,8 @@
 
 A highly customizable "About this Mac" that is missing in most macOS rices.
 
+_I don't have enough time to continue developing this one anymore. The "General" tab is fully functional at the moment. Any fork of this repository in order to continue the development is welcome._
+
 <center>
 <img src="first-preview.png"/>
 <img src="first-bigsur-preview.png"/>
@@ -127,8 +129,8 @@ Given that you have already had the configuration files generated.
     ```
 
 # Roadmap
-- Implement font changing.
-- Implement "Storage" tab.
+- ~~Implement font changing.~~
+- ~~Implement "Storage" tab.~~
 
 # Changelog
 ```
